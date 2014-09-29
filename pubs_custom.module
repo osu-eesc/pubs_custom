@@ -1,0 +1,71 @@
+<?php
+
+/**
+ * @file
+ * Code for the pubs_custom feature.
+ */
+
+include_once 'pubs_custom.features.inc';
+
+/**
+ * Implements hook_block_info().
+ *
+ * This hook declares what blocks are provided by the module.
+ */
+function pubs_custom_block_info() {
+
+  $blocks['og_nice_menus'] = array(
+    'info' => t('OG Nice Menus Block'),
+    'cache' => DRUPAL_NO_CACHE,
+    'region' => 'main_menu',
+  );
+
+  return $blocks;
+
+}
+
+
+/**
+ * Implements hook_block_view().
+ *
+ * This hook generates the contents of the blocks themselves.
+ */
+function pubs_custom_block_view($delta = '') {
+  //The $delta parameter tells us which block is being requested.
+  $block = '';
+  switch ($delta) {
+
+    case 'og_nice_menus':
+      $block['subject'] = t('');
+
+      $context = og_context();
+
+      $menus = og_menu_get_group_menus(array(
+        $context['group_type'] => array($context['gid'])
+      ));
+      // Make sure we have a menu for this group.
+      if (!empty($menus)) {
+        $block['content'] = '';
+        // Render all menus one next to each other. If you only want the first one, change the foreach with the first element from $menus.
+        foreach ($menus as $menu) {
+          // Default settings.
+          // Since we do not have a block for each menu, we do not have this information stored as variables.
+          $direction = 'down';
+          $depth = '-1';
+          // Here is where the magic happens.
+          if ($output = theme('nice_menus', array('id' => $delta, 'menu_name' => $menu['menu_name'], 'direction' => $direction, 'depth' => $depth))) {
+            $block['content'] .= $output['content'];
+          }
+
+        }
+
+      }
+
+    break;
+
+  }
+
+  return $block;
+
+}
+
